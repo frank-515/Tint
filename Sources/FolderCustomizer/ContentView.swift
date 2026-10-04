@@ -26,8 +26,7 @@ struct ContentView: View {
     @State private var statusTask: Task<Void, Never>?
     @State private var isTargeted = false
     @State private var colorCoordinator: ColorPanelCoordinator?
-    @State private var quickActionEnabled = false
-    @State private var customBaseMode = false
+    @ObservedObject private var settings = AppSettings.shared
     @FocusState private var emojiFieldFocused: Bool
 
     private let paletteColors: [Color] = [
@@ -46,11 +45,6 @@ struct ContentView: View {
                 if !folders.isEmpty {
                     folderChips
                 }
-                if !customizedFolders.isEmpty && !customBaseMode {
-                    Text("These folders already have custom icons. Applying will replace them. Enable “Edit from current icon” in Options to keep building on them.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
 
             VStack(alignment: .leading, spacing: 12) {
@@ -61,9 +55,8 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 10) {
                 sectionLabel("Emoji")
                 emojiRow
+                opacityRow
             }
-
-            optionsGroup
 
             applyButton
 
@@ -85,9 +78,11 @@ struct ContentView: View {
         .onReceive(OpenedFolderBus.opened) { urls in
             addFolders(urls)
         }
-        .onAppear {
-            quickActionEnabled = QuickActionInstaller.isInstalled
+        .onReceive(NotificationCenter.default.publisher(for: .tintStatus)) { note in
+            guard let message = note.userInfo?["message"] as? String else { return }
+            showStatus(message, success: note.userInfo?["success"] as? Bool ?? true)
         }
+        .focusedValue(\.resetIconsAction) { resetIcons() }
     }
 
     // MARK: - Preview
@@ -261,52 +256,15 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Options
-
-    private var optionsGroup: some View {
-        DisclosureGroup {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 10) {
-                    Text("Emoji Opacity")
-                    Slider(value: $emojiOpacity, in: 0...1)
-                    Text("\(Int(emojiOpacity * 100))%")
-                        .font(.caption.monospacedDigit())
-                        .foregroundColor(.secondary)
-                        .frame(width: 36, alignment: .trailing)
-                }
-                Divider()
-                Toggle(isOn: $customBaseMode) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Edit from current icon")
-                        Text("Build on existing custom icons instead of the system folder")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .disabled(customizedFolders.isEmpty)
-                Divider()
-                Toggle(isOn: $quickActionEnabled) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Finder Quick Action")
-                        Text("Adds “Open in Tint” to the Finder right-click menu")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .onChange(of: quickActionEnabled) { enabled in
-                    toggleQuickAction(enabled)
-                }
-                Divider()
-                Button {
-                    resetIcons()
-                } label: {
-                    Label("Reset to Default Icon", systemImage: "arrow.uturn.backward")
-                }
-                .disabled(folders.isEmpty)
-            }
-            .padding(.top, 10)
-        } label: {
-            sectionLabel("Options")
+    private var opacityRow: some View {
+        HStack(spacing: 10) {
+            Text("Emoji Opacity")
+                .foregroundColor(.secondary)
+            Slider(value: $emojiOpacity, in: 0...1)
+            Text("\(Int(emojiOpacity * 100))%")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(.secondary)
+                .frame(width: 36, alignment: .trailing)
         }
     }
 
@@ -383,7 +341,7 @@ struct ContentView: View {
     /// 「基于当前图标编辑」开启时，用第一个已定制文件夹的当前图标作为渲染基底。
     @MainActor
     private var renderBase: NSImage? {
-        guard customBaseMode, let url = customizedFolders.first else { return nil }
+        guard settings.editFromCurrentIcon, let url = customizedFolders.first else { return nil }
         return NSWorkspace.shared.icon(forFile: url.path)
     }
 
@@ -444,21 +402,6 @@ struct ContentView: View {
         emojiFieldFocused = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             NSApp.orderFrontCharacterPalette(nil)
-        }
-    }
-
-    private func toggleQuickAction(_ enabled: Bool) {
-        do {
-            if enabled {
-                try QuickActionInstaller.install()
-                showStatus(String(localized: "Quick Action installed"))
-            } else {
-                QuickActionInstaller.remove()
-                showStatus(String(localized: "Quick Action removed"))
-            }
-        } catch {
-            quickActionEnabled = !enabled
-            showStatus(String(localized: "Failed to update Quick Action"), success: false)
         }
     }
 
