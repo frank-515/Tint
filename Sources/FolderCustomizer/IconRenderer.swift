@@ -47,9 +47,14 @@ private final class IconRenderCache {
     }
 }
 
-/// 用系统文件夹图标作基底：先铺主题色，再用原图的亮度叠加回阴影/高光，最后叠加 emoji。
+/// 用文件夹图标作基底：先铺主题色，再用原图的亮度叠加回阴影/高光，最后叠加 emoji。
+/// `base` 传 nil 时使用系统通用文件夹图标；传入某个文件夹的当前图标则在其上继续编辑。
 @MainActor
-func renderFolderIcon(color: NSColor, emoji: String?, emojiOpacity: CGFloat, size: CGFloat) -> NSImage {
+func renderFolderIcon(color: NSColor, emoji: String?, emojiOpacity: CGFloat, size: CGFloat, base: NSImage? = nil) -> NSImage {
+    if let base {
+        return drawFolderIcon(color: color, emoji: emoji, emojiOpacity: emojiOpacity, size: size, baseIcon: base)
+    }
+
     let srgb = color.usingColorSpace(.sRGB) ?? color
     let cacheKey = String(
         format: "%d,%d,%d,%d|%@|%d|%d",
@@ -59,14 +64,16 @@ func renderFolderIcon(color: NSColor, emoji: String?, emojiOpacity: CGFloat, siz
     )
     if let cached = IconRenderCache.shared.get(cacheKey) { return cached }
 
-    let image = drawFolderIcon(color: color, emoji: emoji, emojiOpacity: emojiOpacity, size: size)
+    let image = drawFolderIcon(color: color, emoji: emoji, emojiOpacity: emojiOpacity, size: size,
+                               baseIcon: systemFolderIcon(size: size))
     IconRenderCache.shared.put(cacheKey, image)
     return image
 }
 
 @MainActor
-private func drawFolderIcon(color: NSColor, emoji: String?, emojiOpacity: CGFloat, size: CGFloat) -> NSImage {
-    let base = systemFolderIcon(size: size)
+private func drawFolderIcon(color: NSColor, emoji: String?, emojiOpacity: CGFloat, size: CGFloat, baseIcon: NSImage) -> NSImage {
+    let base = baseIcon
+    base.size = NSSize(width: size, height: size)
     let pixels = Int(size)
 
     guard let baseCG = cgImage(from: base, pixels: pixels) else { return base }

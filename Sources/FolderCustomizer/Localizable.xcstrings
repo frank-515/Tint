@@ -1,6 +1,159 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Adds “Open in Tint” to the Finder right-click menu" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds “Open in Tint” to the Finder right-click menu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Finder 右键菜单中添加“Open in Tint”"
+          }
+        }
+      }
+    },
+    "Build on existing custom icons instead of the system folder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build on existing custom icons instead of the system folder"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在已有自定义图标的基础上继续编辑，而不是系统文件夹"
+          }
+        }
+      }
+    },
+    "Edit from current icon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit from current icon"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基于当前图标编辑"
+          }
+        }
+      }
+    },
+    "Failed to update Quick Action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to update Quick Action"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷操作设置失败"
+          }
+        }
+      }
+    },
+    "Finder Quick Action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder Quick Action"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder 快捷操作"
+          }
+        }
+      }
+    },
+    "Has a custom icon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has a custom icon"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已含自定义图标"
+          }
+        }
+      }
+    },
+    "Quick Action installed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Action installed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷操作已启用"
+          }
+        }
+      }
+    },
+    "Quick Action removed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Action removed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷操作已关闭"
+          }
+        }
+      }
+    },
+    "These folders already have custom icons. Applying will replace them. Enable “Edit from current icon” in Options to keep building on them." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These folders already have custom icons. Applying will replace them. Enable “Edit from current icon” in Options to keep building on them."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选文件夹已含自定义图标，应用后将覆盖。可在“选项”中开启“基于当前图标编辑”以继续调整。"
+          }
+        }
+      }
+    },
     "All…" : {
       "extractionState" : "manual",
       "localizations" : {

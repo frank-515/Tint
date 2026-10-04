@@ -22,8 +22,12 @@ struct ContentView: View {
     @State private var emoji: String = ""
     @State private var emojiOpacity: Double = 1.0
     @State private var statusMessage: String = ""
+    @State private var statusIsSuccess = true
+    @State private var statusTask: Task<Void, Never>?
     @State private var isTargeted = false
     @State private var colorCoordinator: ColorPanelCoordinator?
+    @State private var quickActionEnabled = false
+    @State private var customBaseMode = false
     @FocusState private var emojiFieldFocused: Bool
 
     private let paletteColors: [Color] = [
@@ -42,6 +46,11 @@ struct ContentView: View {
                 if !folders.isEmpty {
                     folderChips
                 }
+                if !customizedFolders.isEmpty && !customBaseMode {
+                    Text("These folders already have custom icons. Applying will replace them. Enable “Edit from current icon” in Options to keep building on them.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
 
             VStack(alignment: .leading, spacing: 12) {
@@ -53,16 +62,12 @@ struct ContentView: View {
                 sectionLabel("Emoji")
                 emojiRow
             }
+
             optionsGroup
 
             applyButton
 
-            if !statusMessage.isEmpty {
-                Text(statusMessage)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .transition(.opacity)
-            }
+            statusToast
         }
         .padding(24)
         .frame(width: 480)
@@ -76,6 +81,12 @@ struct ContentView: View {
             if selectedPreset == -1 {
                 themeColor = accentColor
             }
+        }
+        .onReceive(OpenedFolderBus.opened) { urls in
+            addFolders(urls)
+        }
+        .onAppear {
+            quickActionEnabled = QuickActionInstaller.isInstalled
         }
     }
 
@@ -121,7 +132,7 @@ struct ContentView: View {
             .contentShape(RoundedRectangle(cornerRadius: 10))
             .onTapGesture { chooseFolders() }
             .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
-                addFolders(from: providers)
+                addFoldersFromProviders(providers)
                 return true
             }
     }
@@ -144,6 +155,12 @@ struct ContentView: View {
                 .font(.caption)
                 .lineLimit(1)
                 .truncationMode(.middle)
+            if customizedFolders.contains(url) {
+                Image(systemName: "paintbrush.fill")
+                    .font(.caption2)
+                    .foregroundColor(.accentColor)
+                    .help(Text("Has a custom icon"))
+            }
             Button {
                 folders.removeAll { $0 == url }
             } label: {
@@ -258,6 +275,28 @@ struct ContentView: View {
                         .frame(width: 36, alignment: .trailing)
                 }
                 Divider()
+                Toggle(isOn: $customBaseMode) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Edit from current icon")
+                        Text("Build on existing custom icons instead of the system folder")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .disabled(customizedFolders.isEmpty)
+                Divider()
+                Toggle(isOn: $quickActionEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Finder Quick Action")
+                        Text("Adds “Open in Tint” to the Finder right-click menu")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .onChange(of: quickActionEnabled) { enabled in
+                    toggleQuickAction(enabled)
+                }
+                Divider()
                 Button {
                     resetIcons()
                 } label: {
@@ -284,13 +323,41 @@ struct ContentView: View {
             } icon: {
                 Image(systemName: "checkmark.circle.fill")
             }
-                .font(.body.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
+            .font(.body.weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 4)
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .disabled(folders.isEmpty)
+    }
+
+    // MARK: - Status toast
+
+    private var statusToast: some View {
+        HStack(spacing: 6) {
+            if !statusMessage.isEmpty {
+                Image(systemName: statusIsSuccess ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                    .foregroundColor(statusIsSuccess ? .green : .orange)
+                Text(statusMessage)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .font(.caption)
+        .frame(maxWidth: .infinity)
+        .transition(.opacity)
+    }
+
+    private func showStatus(_ message: String, success: Bool = true) {
+        statusMessage = message
+        statusIsSuccess = success
+        statusTask?.cancel()
+        statusTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            if !Task.isCancelled {
+                statusMessage = ""
+            }
+        }
     }
 
     // MARK: - Helpers
@@ -304,12 +371,46 @@ struct ContentView: View {
         emoji.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// macOS 给设置了自定义图标的文件夹写入一个名为 "Icon\r" 的隐形文件。
+    private func hasCustomIcon(_ url: URL) -> Bool {
+        FileManager.default.fileExists(atPath: url.appendingPathComponent("Icon\u{0D}").path)
+    }
+
+    private var customizedFolders: [URL] {
+        folders.filter { hasCustomIcon($0) }
+    }
+
+    /// 「基于当前图标编辑」开启时，用第一个已定制文件夹的当前图标作为渲染基底。
+    @MainActor
+    private var renderBase: NSImage? {
+        guard customBaseMode, let url = customizedFolders.first else { return nil }
+        return NSWorkspace.shared.icon(forFile: url.path)
+    }
+
     @MainActor
     private func makePreview() -> NSImage? {
         renderFolderIcon(color: NSColor(themeColor),
                          emoji: trimmedEmoji,
                          emojiOpacity: CGFloat(emojiOpacity),
-                         size: 256)
+                         size: 256,
+                         base: renderBase)
+    }
+
+    private func addFolders(_ newURLs: [URL]) {
+        for url in newURLs where url.hasDirectoryPath && !folders.contains(url) {
+            folders.append(url)
+        }
+    }
+
+    private func addFoldersFromProviders(_ providers: [NSItemProvider]) {
+        for provider in providers {
+            _ = provider.loadObject(ofClass: URL.self) { object, _ in
+                guard let url = object else { return }
+                DispatchQueue.main.async {
+                    addFolders([url])
+                }
+            }
+        }
     }
 
     private func chooseFolders() {
@@ -319,22 +420,7 @@ struct ContentView: View {
         panel.allowsMultipleSelection = true
         panel.message = String(localized: "Choose one or more folders")
         if panel.runModal() == .OK {
-            for url in panel.urls where !folders.contains(url) {
-                folders.append(url)
-            }
-        }
-    }
-
-    private func addFolders(from providers: [NSItemProvider]) {
-        for provider in providers {
-            _ = provider.loadObject(ofClass: URL.self) { object, _ in
-                guard let url = object, url.hasDirectoryPath else { return }
-                DispatchQueue.main.async {
-                    if !folders.contains(url) {
-                        folders.append(url)
-                    }
-                }
-            }
+            addFolders(panel.urls)
         }
     }
 
@@ -361,29 +447,45 @@ struct ContentView: View {
         }
     }
 
+    private func toggleQuickAction(_ enabled: Bool) {
+        do {
+            if enabled {
+                try QuickActionInstaller.install()
+                showStatus(String(localized: "Quick Action installed"))
+            } else {
+                QuickActionInstaller.remove()
+                showStatus(String(localized: "Quick Action removed"))
+            }
+        } catch {
+            quickActionEnabled = !enabled
+            showStatus(String(localized: "Failed to update Quick Action"), success: false)
+        }
+    }
+
     private func applyIcons() {
         guard !folders.isEmpty else {
-            statusMessage = String(localized: "Select at least one folder first")
+            showStatus(String(localized: "Select at least one folder first"), success: false)
             return
         }
         let image = renderFolderIcon(color: NSColor(themeColor),
                                      emoji: trimmedEmoji,
                                      emojiOpacity: CGFloat(emojiOpacity),
-                                     size: 512)
+                                     size: 512,
+                                     base: renderBase)
         for url in folders {
             NSWorkspace.shared.setIcon(image, forFile: url.path, options: [])
         }
-        statusMessage = String(localized: "Applied to \(folders.count) folders")
+        showStatus(String(localized: "Applied to \(folders.count) folders"))
     }
 
     private func resetIcons() {
         guard !folders.isEmpty else {
-            statusMessage = String(localized: "Select at least one folder first")
+            showStatus(String(localized: "Select at least one folder first"), success: false)
             return
         }
         for url in folders {
             NSWorkspace.shared.setIcon(nil, forFile: url.path, options: [])
         }
-        statusMessage = String(localized: "Default icon restored")
+        showStatus(String(localized: "Default icon restored"))
     }
 }

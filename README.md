@@ -9,6 +9,8 @@ A tiny native macOS utility to recolor folder icons and overlay an emoji — ren
 - **Recolor** any folder with a preset color, a custom color, or your **system accent color** (live-updates when you change it in System Settings)
 - **Emoji overlay** with adjustable opacity
 - **Batch apply** — drag & drop multiple folders, or pick them in the open panel
+- **Finder Quick Action** (optional, off by default) — right-click a folder in Finder and choose *Open in Tint*
+- **Detects existing custom icons** — badges customized folders and can keep editing from the current icon instead of overwriting
 - **One-click restore** to the default folder icon
 - **English & 简体中文** (follows system language)
 - Native SwiftUI, no dependencies

@@ -12,6 +12,7 @@
 		C83EE0DFDB8C6F96467E9795 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC9BAEAFFF18AF429FF5A171 /* Assets.xcassets */; };
 		EE6B083727B31D3CC6BEF33A /* FolderCustomizerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CE75D26A3DE6762DC074050 /* FolderCustomizerApp.swift */; };
 		FC1623A1D3A1602A2F6FB848 /* IconRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06E4BF48581E25A63E46A84 /* IconRenderer.swift */; };
+		FF3316147BD14ED1D976D35F /* QuickAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC534A17826B6ED090E64085 /* QuickAction.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		A06E4BF48581E25A63E46A84 /* IconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconRenderer.swift; sourceTree = "<group>"; };
 		C81EFEABC24C1FCCBFE24E87 /* FolderCustomizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FolderCustomizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC9BAEAFFF18AF429FF5A171 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EC534A17826B6ED090E64085 /* QuickAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -56,6 +58,7 @@
 				6CE75D26A3DE6762DC074050 /* FolderCustomizerApp.swift */,
 				A06E4BF48581E25A63E46A84 /* IconRenderer.swift */,
 				47E5BCE3ACC91C5BA227C68C /* Localizable.xcstrings */,
+				EC534A17826B6ED090E64085 /* QuickAction.swift */,
 			);
 			path = FolderCustomizer;
 			sourceTree = "<group>";
@@ -136,6 +139,7 @@
 				7208F939EA6D4357C632139A /* ContentView.swift in Sources */,
 				EE6B083727B31D3CC6BEF33A /* FolderCustomizerApp.swift in Sources */,
 				FC1623A1D3A1602A2F6FB848 /* IconRenderer.swift in Sources */,
+				FF3316147BD14ED1D976D35F /* QuickAction.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
