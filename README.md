@@ -1,4 +1,4 @@
-# FolderCustomizer
+# Tint
 
 A tiny native macOS utility to recolor folder icons and overlay an emoji — rendered from the real system folder icon, not a placeholder shape.
 
@@ -24,8 +24,8 @@ Grab the latest `.dmg` from [GitHub Releases](../../releases), or build from sou
 Requirements: Xcode 15 or later. [`xcodegen`](https://github.com/yonaskolb/XcodeGen) is only needed to regenerate the project file.
 
 ```sh
-./build.sh          # build FolderCustomizer.app
-./build.sh dmg      # also produce dist/FolderCustomizer.dmg
+./build.sh          # build Tint.app
+./build.sh dmg      # also produce dist/Tint.dmg
 ```
 
 Or open `FolderCustomizer.xcodeproj` in Xcode and press Cmd+R.

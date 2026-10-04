@@ -20,10 +20,10 @@ targets:
       - path: Sources/FolderCustomizer
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.frank515.FolderCustomizer
-        PRODUCT_NAME: FolderCustomizer
+        PRODUCT_BUNDLE_IDENTIFIER: com.frank515.Tint
+        PRODUCT_NAME: Tint
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: FolderCustomizer
+        INFOPLIST_KEY_CFBundleDisplayName: Tint
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_NSHighResolutionCapable: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
