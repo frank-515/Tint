@@ -2,6 +2,8 @@
 
 A tiny native macOS utility to recolor folder icons and overlay an emoji — rendered from the real system folder icon, not a placeholder shape.
 
+![Tint app screenshot](docs/screenshot.png)
+
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## Features
